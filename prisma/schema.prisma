@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -9,4 +6,69 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model Aluno {
+  id             Int               @id @default(autoincrement())
+  nome           String
+  cpf            String            @unique
+  email          String            @unique
+  telefone       String
+  dataNascimento DateTime
+  endereco       String?
+  matriculas     Matricula[]
+  tiposTreino    AlunoTipoTreino[]
+}
+
+model TipodeTreino {
+  id         Int      @id @default(autoincrement())
+  tipo       String   @unique
+  descricao  String?
+  alunos     AlunoTipoTreino[]
+  exercicios Exercicio[]
+}
+
+
+model AlunoTipoTreino {
+  id             Int @id @default(autoincrement())
+  alunoId        Int
+  tipodeTreinoId Int
+
+  aluno        Aluno        @relation(fields: [alunoId], references: [id])
+  tipodeTreino TipodeTreino @relation(fields: [tipodeTreinoId], references: [id])
+
+  @@unique([alunoId, tipodeTreinoId])
+}
+
+model Plano {
+  id          Int         @id @default(autoincrement())
+  tipo        String
+  descricao   String?
+  preco       Float
+  duracaoDias Int
+  matriculas  Matricula[]
+}
+
+model Matricula {
+  id            Int      @id @default(autoincrement())
+  alunoId       Int
+  planoId       Int
+  dataMatricula DateTime
+  dataValidade  DateTime
+  ativo         Boolean
+  observacoes   String?
+
+  aluno Aluno @relation(fields: [alunoId], references: [id])
+  plano Plano @relation(fields: [planoId], references: [id])
+}
+
+model Exercicio {
+  id         Int    @id @default(autoincrement())
+  treinoId   Int
+  nome       String
+  series     Int
+  repeticoes Int
+  carga      Float?
+
+  treino TipodeTreino @relation(fields: [treinoId], references: [id])
 }
